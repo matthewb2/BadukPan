@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -31,7 +32,7 @@ namespace BadukPan
             this.panel1.Paint += panel1_Paint;
             this.panel1.MouseDown += panel1_MouseDown;
 
-            this.Text = "바둑판 by Matthew K. Bang";
+            this.Text = "바둑판";
             this.BackColor = Color.FromArgb(225, 179, 104);
 
             pen = new Pen(Color.Black);
@@ -44,6 +45,12 @@ namespace BadukPan
             panel1.SetBounds(0, menuStrip1.Height, this.ClientSize.Width,
                              this.ClientSize.Height - menuStrip1.Height);
             panel1.BackColor = Color.Transparent;
+        }
+
+        private void 정보ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (About dlg = new About())
+                dlg.ShowDialog(this);
         }
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
@@ -60,13 +67,109 @@ namespace BadukPan
             if (바둑판[x, y] != STONE.none)
                 return;
 
-            바둑판[x, y] = flag ? STONE.white : STONE.black;
-            flag = !flag;
+            STONE me = flag ? STONE.white : STONE.black;
+            바둑판[x, y] = me;
 
-            // --- ✅ [2] 전체 갱신 대신 해당 부분만 무효화 ---
-            int px = margin + 눈Size * x - 돌Size / 2;
-            int py = margin + 눈Size * y - 돌Size / 2;
-            panel1.Invalidate(new Rectangle(px - 2, py - 2, 돌Size + 4, 돌Size + 4));
+            // --- ✅ [3] 상대방 돌이 사방으로 둘러싸이면(집 없음) 집어 올림 ---
+            bool captured = false;
+            CaptureOpponent(x, y, me, ref captured);
+
+            // 자기 돌에 집이 없으면(자살수) 두지 못함
+            if (!captured && NoLiberty(x, y))
+            {
+                바둑판[x, y] = STONE.none;
+                return;
+            }
+
+            flag = !flag;
+            panel1.Invalidate();
+        }
+
+        private void CaptureOpponent(int x, int y, STONE me, ref bool captured)
+        {
+            STONE opp = (me == STONE.black) ? STONE.white : STONE.black;
+
+            foreach (Point p in Neighbors(x, y))
+            {
+                if (바둑판[p.X, p.Y] != opp)
+                    continue;
+
+                if (NoLiberty(p.X, p.Y))
+                {
+                    RemoveGroup(p.X, p.Y);
+                    captured = true;
+                }
+            }
+        }
+
+        private bool NoLiberty(int sx, int sy)
+        {
+            STONE color = 바둑판[sx, sy];
+            bool[,] visited = new bool[19, 19];
+
+            Queue<int> qx = new Queue<int>();
+            Queue<int> qy = new Queue<int>();
+            qx.Enqueue(sx);
+            qy.Enqueue(sy);
+            visited[sx, sy] = true;
+
+            while (qx.Count > 0)
+            {
+                int cx = qx.Dequeue();
+                int cy = qy.Dequeue();
+
+                foreach (Point p in Neighbors(cx, cy))
+                {
+                    if (바둑판[p.X, p.Y] == STONE.none)
+                        return false;
+
+                    if (바둑판[p.X, p.Y] == color && !visited[p.X, p.Y])
+                    {
+                        visited[p.X, p.Y] = true;
+                        qx.Enqueue(p.X);
+                        qy.Enqueue(p.Y);
+                    }
+                }
+            }
+            return true;
+        }
+
+        private void RemoveGroup(int sx, int sy)
+        {
+            STONE color = 바둑판[sx, sy];
+            bool[,] visited = new bool[19, 19];
+
+            Queue<int> qx = new Queue<int>();
+            Queue<int> qy = new Queue<int>();
+            qx.Enqueue(sx);
+            qy.Enqueue(sy);
+            visited[sx, sy] = true;
+
+            while (qx.Count > 0)
+            {
+                int cx = qx.Dequeue();
+                int cy = qy.Dequeue();
+
+                바둑판[cx, cy] = STONE.none;
+
+                foreach (Point p in Neighbors(cx, cy))
+                {
+                    if (바둑판[p.X, p.Y] == color && !visited[p.X, p.Y])
+                    {
+                        visited[p.X, p.Y] = true;
+                        qx.Enqueue(p.X);
+                        qy.Enqueue(p.Y);
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<Point> Neighbors(int x, int y)
+        {
+            if (x > 0) yield return new Point(x - 1, y);
+            if (y > 0) yield return new Point(x, y - 1);
+            if (x < 18) yield return new Point(x + 1, y);
+            if (y < 18) yield return new Point(x, y + 1);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
