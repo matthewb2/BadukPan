@@ -71,7 +71,15 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(273, 72);
             this.label2.TabIndex = 3;
-            this.label2.Text = "수순에 따라 흑·백으로 기보를 기록하는\r\n바둑판 프로그램입니다.\r\n\r\n저작권 © 2025 Matthew K. Bang\r\n엠케이솔루션 제공";
+            this.label2.Text = "수순에 따라 흑·백으로 기보를 기록하는\r\n바둑판 프로그램입니다.\r\n" +
+                "\r\n-- 사용방법 --" +
+                "\r\nD - 마지막 돌을 지움" +
+                "\r\nM - 소리 없음" +
+                "\r\nS - 순번을 표시" +
+                "\r\nC - 순번 초기화" +
+                "\r\nCtrl + C - 화면 초기화" +
+                "\r\n" +
+                "\r\n저작권 © 2025 Matthew K. Bang\r\n엠케이솔루션 제공";
             // 
             // About
             // 

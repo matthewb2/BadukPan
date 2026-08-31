@@ -8,19 +8,26 @@ namespace BadukPan
     public partial class Form1 : Form
     {
         int margin = 40;
-        int 눈Size = 30;
-        int 돌Size = 28;
-        int 화점Size = 10;
+        int GridSize = 30;
+        int DolSize = 28;
+        int FeatureSize = 10;
 
         Pen pen;
         Brush wBrush, bBrush;
 
         enum STONE { none, black, white };
         STONE[,] 바둑판 = new STONE[19, 19];
+        int[,] moveNumbers = new int[19, 19];
+        int moveCount = 0;
+        bool showMoveNumbers = false;
         bool flag = false;
         bool imageFlag = true;
 
         int mouseX = 0, mouseY = 0;
+        int lastStoneX = -1, lastStoneY = -1;
+
+        Timer statusTimer;
+        Label statusLabel;
 
         public Form1()
         {
@@ -31,6 +38,8 @@ namespace BadukPan
 
             this.panel1.Paint += panel1_Paint;
             this.panel1.MouseDown += panel1_MouseDown;
+            this.KeyDown += Form1_KeyDown;
+            this.KeyPreview = true;
 
             this.Text = "바둑판";
             this.BackColor = Color.FromArgb(225, 179, 104);
@@ -39,12 +48,46 @@ namespace BadukPan
             bBrush = new SolidBrush(Color.Black);
             wBrush = new SolidBrush(Color.White);
 
-            this.ClientSize = new Size(2 * margin + 18 * 눈Size,
-              2 * margin + 18 * 눈Size + menuStrip1.Height);
+            this.ClientSize = new Size(2 * margin + 18 * GridSize,
+              2 * margin + 18 * GridSize + menuStrip1.Height);
 
             panel1.SetBounds(0, menuStrip1.Height, this.ClientSize.Width,
                              this.ClientSize.Height - menuStrip1.Height);
             panel1.BackColor = Color.Transparent;
+
+            statusTimer = new Timer();
+            statusTimer.Interval = 2000;
+            statusTimer.Tick += StatusTimer_Tick;
+
+            statusLabel = new Label();
+            statusLabel.AutoSize = true;
+            statusLabel.Font = new Font("굴림", 15f, FontStyle.Bold);
+            statusLabel.ForeColor = Color.DarkRed;
+            statusLabel.BackColor = Color.White;
+            statusLabel.BorderStyle = BorderStyle.FixedSingle;
+            statusLabel.Visible = false;
+            panel1.Controls.Add(statusLabel);
+        }
+
+        private void ShowStatus(string text)
+        {   
+            statusLabel.Font = new Font("Arial", 15, FontStyle.Regular);
+            statusLabel.Text = text;
+            statusLabel.ForeColor = Color.Black;
+            statusLabel.Location = new Point(
+                (panel1.Width - statusLabel.PreferredWidth) / 2,
+                (panel1.Height - statusLabel.PreferredHeight) / 2);
+            statusLabel.Visible = true;
+            statusLabel.BringToFront();
+            statusLabel.BackColor = Color.White;
+            statusTimer.Stop();
+            statusTimer.Start();
+        }
+
+        private void StatusTimer_Tick(object sender, EventArgs e)
+        {
+            statusTimer.Stop();
+            statusLabel.Visible = false;
         }
 
         private void 정보ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -55,14 +98,26 @@ namespace BadukPan
 
         private void panel1_MouseDown(object sender, MouseEventArgs e)
         {
-            int x = (e.X - margin + 눈Size / 2) / 눈Size;
-            int y = (e.Y - margin + 눈Size / 2) / 눈Size;
+            int x = (e.X - margin + GridSize / 2) / GridSize;
+            int y = (e.Y - margin + GridSize / 2) / GridSize;
 
             mouseX = e.X;
             mouseY = e.Y;
 
             if (x < 0 || x > 18 || y < 0 || y > 18)
                 return;
+
+            // --- ✅ 우클릭: 돌 삭제 ---
+            if (e.Button == MouseButtons.Right)
+            {
+                if (바둑판[x, y] != STONE.none)
+                {
+                    moveNumbers[x, y] = 0;
+                    바둑판[x, y] = STONE.none;
+                    panel1.Invalidate();
+                }
+                return;
+            }
 
             if (바둑판[x, y] != STONE.none)
                 return;
@@ -74,14 +129,22 @@ namespace BadukPan
             bool captured = false;
             CaptureOpponent(x, y, me, ref captured);
 
-            // 자기 돌에 집이 없으면(자살수) 두지 못함
+            // 자기 돌에 집이 없으면 두지 못함
             if (!captured && NoLiberty(x, y))
             {
                 바둑판[x, y] = STONE.none;
                 return;
             }
 
+            if (showMoveNumbers)
+            {
+                moveCount++;
+                moveNumbers[x, y] = moveCount;
+            }
+
             flag = !flag;
+            lastStoneX = x;
+            lastStoneY = y;
             panel1.Invalidate();
         }
 
@@ -151,6 +214,7 @@ namespace BadukPan
                 int cy = qy.Dequeue();
 
                 바둑판[cx, cy] = STONE.none;
+                moveNumbers[cx, cy] = 0;
 
                 foreach (Point p in Neighbors(cx, cy))
                 {
@@ -183,10 +247,10 @@ namespace BadukPan
         {
             for (int i = 0; i < 19; i++)
             {
-                g.DrawLine(pen, margin + i * 눈Size, margin,
-                                 margin + i * 눈Size, margin + 18 * 눈Size);
-                g.DrawLine(pen, margin, margin + i * 눈Size,
-                                 margin + 18 * 눈Size, margin + i * 눈Size);
+                g.DrawLine(pen, margin + i * GridSize, margin,
+                                 margin + i * GridSize, margin + 18 * GridSize);
+                g.DrawLine(pen, margin, margin + i * GridSize,
+                                 margin + 18 * GridSize, margin + i * GridSize);
             }
 
             for (int x = 3; x <= 15; x += 6)
@@ -194,9 +258,9 @@ namespace BadukPan
                 for (int y = 3; y <= 15; y += 6)
                 {
                     g.FillEllipse(bBrush,
-                        margin + 눈Size * x - 화점Size / 2,
-                        margin + 눈Size * y - 화점Size / 2,
-                        화점Size, 화점Size);
+                        margin + GridSize * x - FeatureSize / 2,
+                        margin + GridSize * y - FeatureSize / 2,
+                        FeatureSize, FeatureSize);
                 }
             }
         }
@@ -211,9 +275,9 @@ namespace BadukPan
                         continue;
 
                     Rectangle r = new Rectangle(
-                        margin + 눈Size * x - 돌Size / 2,
-                        margin + 눈Size * y - 돌Size / 2,
-                        돌Size, 돌Size);
+                        margin + GridSize * x - DolSize / 2,
+                        margin + GridSize * y - DolSize / 2,
+                        DolSize, DolSize);
 
                     if (!imageFlag)
                     {
@@ -239,7 +303,35 @@ namespace BadukPan
                                 g.FillEllipse(bBrush, r);
                             else
                                 g.FillEllipse(wBrush, r);
+                    }
+                    }
+
+                    // 수순 번호 표시
+                    if (showMoveNumbers && moveNumbers[x, y] > 0)
+                    {
+                        string num = moveNumbers[x, y].ToString();
+                        Brush numBrush = (바둑판[x, y] == STONE.black) ? wBrush : bBrush;
+                        using (Font numFont = new Font("굴림", 10f, FontStyle.Bold))
+                        {
+                            SizeF sz = g.MeasureString(num, numFont);
+                            g.DrawString(num, numFont, numBrush,
+                                margin + GridSize * x - sz.Width / 2,
+                                margin + GridSize * y - sz.Height / 2);
                         }
+                    }
+
+                    // 마지막에 놓인 돌에 삼각형 표시
+                    if (x == lastStoneX && y == lastStoneY)
+                    {
+                        int cx = margin + GridSize * x;
+                        int cy = margin + GridSize * y;
+                        Point[] tri = new Point[]
+                        {
+                        new Point(cx, cy - 8),
+                        new Point(cx - 7, cy + 5),
+                        new Point(cx + 7, cy + 5)
+                        };
+                        g.DrawPolygon(Pens.Red, tri);
                     }
                 }
             }
