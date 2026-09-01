@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Media;
 using System.Windows.Forms;
 
 namespace BadukPan
@@ -28,6 +29,7 @@ namespace BadukPan
 
         Timer statusTimer;
         Label statusLabel;
+        Bitmap background;          // 현재 바둑판 배경 이미지 (null이면 기본 바탕색)
 
         public Form1()
         {
@@ -146,6 +148,21 @@ namespace BadukPan
             lastStoneX = x;
             lastStoneY = y;
             panel1.Invalidate();
+
+            // --- ✅ 돌 소리 재생 ---
+            PlayStoneSound();
+        }
+
+        private void PlayStoneSound()
+        {
+            try
+            {
+                using (SoundPlayer player = new SoundPlayer("../../stone.wav"))
+                    player.Play();
+            }
+            catch
+            {
+            }
         }
 
         private void CaptureOpponent(int x, int y, STONE me, ref bool captured)
@@ -245,6 +262,9 @@ namespace BadukPan
 
         private void DrawBoard(Graphics g)
         {
+            if (background != null)
+                g.DrawImage(background, 0, 0, panel1.Width, panel1.Height);
+
             for (int i = 0; i < 19; i++)
             {
                 g.DrawLine(pen, margin + i * GridSize, margin,
