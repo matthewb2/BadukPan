@@ -8,24 +8,17 @@ namespace BadukPan
     {
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.D && lastStoneX >= 0)
+if (e.KeyCode == Keys.D)
             {
-                moveNumbers[lastStoneX, lastStoneY] = 0;
-                바둑판[lastStoneX, lastStoneY] = STONE.none;
-                lastStoneX = lastStoneY = -1;
-                flag = !flag;
-                panel1.Invalidate();
+                DeleteLastMove();
             }
             else if (e.KeyCode == Keys.M)
             {
-                bool start = !showMoveNumbers;
-                showMoveNumbers = start;
-                if (!showMoveNumbers)
-                    moveCount = 0;
-                ShowStatus(start ? "수순 기록 시작" : "수순 기록 해제");
+                isMuted = !isMuted;
+                ShowStatus(isMuted ? "소리 없음" : "소리 켜짐");
                 panel1.Invalidate();
             }
-            else if (e.KeyCode == Keys.C && e.Control)
+else if (e.KeyCode == Keys.C && e.Control)
             {
                 for (int i = 0; i < 19; i++)
                     for (int j = 0; j < 19; j++)
@@ -36,6 +29,7 @@ namespace BadukPan
                 moveCount = 0;
                 lastStoneX = lastStoneY = -1;
                 flag = false;
+                moveHistory.Clear();
                 panel1.Invalidate();
             }
             else if (e.KeyCode == Keys.D0 ||
@@ -51,7 +45,25 @@ namespace BadukPan
                 panel1.Invalidate();
             }
         }
-private void LoadBackground(Keys key)
+private void DeleteLastMove()
+        {
+            for (int i = moveHistory.Count - 1; i >= 0; i--)
+            {
+                Point p = moveHistory[i];
+                if (바둑판[p.X, p.Y] == STONE.none)
+                    continue;
+
+                moveNumbers[p.X, p.Y] = 0;
+                moveHistory.RemoveAt(i);
+                바둑판[p.X, p.Y] = STONE.none;
+                flag = !flag;
+                SetLastStoneToLastMove();
+                panel1.Invalidate();
+                return;
+            }
+        }
+
+        private void LoadBackground(Keys key)
         {
             string file = null;
             if (key == Keys.D0 || key == Keys.NumPad0) file = null;

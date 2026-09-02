@@ -20,12 +20,14 @@ namespace BadukPan
         STONE[,] 바둑판 = new STONE[19, 19];
         int[,] moveNumbers = new int[19, 19];
         int moveCount = 0;
-        bool showMoveNumbers = false;
+bool showMoveNumbers = false;
+        bool isMuted = false;
         bool flag = false;
         bool imageFlag = true;
 
-        int mouseX = 0, mouseY = 0;
+int mouseX = 0, mouseY = 0;
         int lastStoneX = -1, lastStoneY = -1;
+        List<Point> moveHistory = new List<Point>();
 
         Timer statusTimer;
         Label statusLabel;
@@ -109,13 +111,15 @@ namespace BadukPan
             if (x < 0 || x > 18 || y < 0 || y > 18)
                 return;
 
-            // --- ✅ 우클릭: 돌 삭제 ---
+// --- ✅ 우클릭: 돌 삭제 ---
             if (e.Button == MouseButtons.Right)
             {
                 if (바둑판[x, y] != STONE.none)
                 {
                     moveNumbers[x, y] = 0;
+                    moveHistory.Remove(new Point(x, y));
                     바둑판[x, y] = STONE.none;
+                    SetLastStoneToLastMove();
                     panel1.Invalidate();
                 }
                 return;
@@ -147,6 +151,7 @@ namespace BadukPan
             flag = !flag;
             lastStoneX = x;
             lastStoneY = y;
+            moveHistory.Add(new Point(x, y));
             panel1.Invalidate();
 
             // --- ✅ 돌 소리 재생 ---
@@ -155,6 +160,9 @@ namespace BadukPan
 
         private void PlayStoneSound()
         {
+            if (isMuted)
+                return;
+
             try
             {
                 using (SoundPlayer player = new SoundPlayer("../../stone.wav"))
@@ -162,6 +170,21 @@ namespace BadukPan
             }
             catch
             {
+            }
+        }
+
+        private void SetLastStoneToLastMove()
+        {
+            lastStoneX = lastStoneY = -1;
+            for (int i = moveHistory.Count - 1; i >= 0; i--)
+            {
+                Point p = moveHistory[i];
+                if (바둑판[p.X, p.Y] != STONE.none)
+                {
+                    lastStoneX = p.X;
+                    lastStoneY = p.Y;
+                    break;
+                }
             }
         }
 

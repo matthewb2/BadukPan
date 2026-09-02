@@ -37,7 +37,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(373, 285);
+            this.button1.Location = new System.Drawing.Point(349, 318);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
@@ -51,7 +51,7 @@
             this.label1.Font = new System.Drawing.Font("굴림", 16F, System.Drawing.FontStyle.Bold);
             this.label1.Location = new System.Drawing.Point(135, 15);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(190, 22);
+            this.label1.Size = new System.Drawing.Size(233, 22);
             this.label1.TabIndex = 1;
             this.label1.Text = "바둑판 기보 프로그램";
             // 
@@ -69,23 +69,17 @@
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(95, 185);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(273, 72);
+            this.label2.Size = new System.Drawing.Size(216, 156);
             this.label2.TabIndex = 3;
-            this.label2.Text = "수순에 따라 흑·백으로 기보를 기록하는\r\n바둑판 프로그램입니다.\r\n" +
-                "\r\n-- 사용방법 --" +
-                "\r\nD - 마지막 돌을 지움" +
-                "\r\nM - 소리 없음" +
-                "\r\nS - 순번을 표시" +
-                "\r\nC - 순번 초기화" +
-                "\r\nCtrl + C - 화면 초기화" +
-                "\r\n" +
-                "\r\n저작권 © 2025 Matthew K. Bang\r\n엠케이솔루션 제공";
+            this.label2.Text = "수순에 따라 흑·백으로 기보를 기록하는\r\n바둑판 프로그램입니다.\r\n\r\n-- 사용방법 --\r\nD - 마지막 돌을 지움\r\nM - 소리 없음\r\nS - " +
+    "순번을 표시\r\nC - 순번 초기화\r\n숫자키 - 배경화면 변경\r\nCtrl + C - 화면 초기화\r\n\r\nCopyright © 2026 엠케이솔루" +
+    "션 제공";
             // 
             // About
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(460, 320);
+            this.ClientSize = new System.Drawing.Size(460, 353);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.label1);
