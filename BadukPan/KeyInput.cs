@@ -38,7 +38,9 @@ namespace BadukPan
                 flag = false;
                 panel1.Invalidate();
             }
-            else if (e.KeyCode == Keys.D1 ||
+            else if (e.KeyCode == Keys.D0 ||
+                     e.KeyCode == Keys.NumPad0 ||
+                     e.KeyCode == Keys.D1 ||
                      e.KeyCode == Keys.NumPad1 ||
                      e.KeyCode == Keys.D2 ||
                      e.KeyCode == Keys.NumPad2 ||
@@ -49,19 +51,23 @@ namespace BadukPan
                 panel1.Invalidate();
             }
         }
-        private void LoadBackground(Keys key)
+private void LoadBackground(Keys key)
         {
             string file = null;
-            if (key == Keys.D1 || key == Keys.NumPad1) file = "bg1.jpg";
+            if (key == Keys.D0 || key == Keys.NumPad0) file = null;
+            else if (key == Keys.D1 || key == Keys.NumPad1) file = "bg1.jpg";
             else if (key == Keys.D2 || key == Keys.NumPad2) file = "bg2.jpg";
             else if (key == Keys.D3 || key == Keys.NumPad3) file = "bg3.jpg";
 
-            if (file == null) return;
+            if (background != null)
+                background.Dispose();
+            background = null;
+
+            if (file == null)
+                return;
 
             try
             {
-                if (background != null)
-                    background.Dispose();
                 background = new Bitmap("../../Images/" + file);
             }
             catch
