@@ -17,7 +17,7 @@ namespace BadukPan
         Brush wBrush, bBrush;
 
         enum STONE { none, black, white };
-        STONE[,] 바둑판 = new STONE[19, 19];
+        STONE[,] Board = new STONE[19, 19];
         int[,] moveNumbers = new int[19, 19];
         int moveCount = 0;
 bool showMoveNumbers = false;
@@ -33,7 +33,7 @@ int mouseX = 0, mouseY = 0;
 
         Timer statusTimer;
         Label statusLabel;
-        Bitmap background;          // 현재 바둑판 배경 이미지 (null이면 기본 바탕색)
+        Bitmap background;          // 현재 Board 배경 이미지 (null이면 기본 바탕색)
 
         public Form1()
         {
@@ -49,7 +49,7 @@ this.panel1.Paint += panel1_Paint;
             this.KeyDown += Form1_KeyDown;
             this.KeyPreview = true;
 
-            this.Text = "바둑판";
+            this.Text = "Board";
             this.BackColor = Color.FromArgb(225, 179, 104);
 
             pen = new Pen(Color.Black);
@@ -140,22 +140,22 @@ this.panel1.Paint += panel1_Paint;
 // --- ✅ 우클릭: 돌 삭제 ---
             if (e.Button == MouseButtons.Right)
             {
-                if (바둑판[x, y] != STONE.none)
+                if (Board[x, y] != STONE.none)
                 {
                     moveNumbers[x, y] = 0;
                     moveHistory.Remove(new Point(x, y));
-                    바둑판[x, y] = STONE.none;
+                    Board[x, y] = STONE.none;
                     SetLastStoneToLastMove();
                     panel1.Invalidate();
                 }
                 return;
             }
 
-            if (바둑판[x, y] != STONE.none)
+            if (Board[x, y] != STONE.none)
                 return;
 
             STONE me = flag ? STONE.white : STONE.black;
-            바둑판[x, y] = me;
+            Board[x, y] = me;
 
             // --- ✅ [3] 상대방 돌이 사방으로 둘러싸이면(집 없음) 집어 올림 ---
             bool captured = false;
@@ -164,7 +164,7 @@ this.panel1.Paint += panel1_Paint;
             // 자기 돌에 집이 없으면 두지 못함
             if (!captured && NoLiberty(x, y))
             {
-                바둑판[x, y] = STONE.none;
+                Board[x, y] = STONE.none;
                 return;
             }
 
@@ -205,7 +205,7 @@ this.panel1.Paint += panel1_Paint;
             for (int i = moveHistory.Count - 1; i >= 0; i--)
             {
                 Point p = moveHistory[i];
-                if (바둑판[p.X, p.Y] != STONE.none)
+                if (Board[p.X, p.Y] != STONE.none)
                 {
                     lastStoneX = p.X;
                     lastStoneY = p.Y;
@@ -220,7 +220,7 @@ this.panel1.Paint += panel1_Paint;
 
             foreach (Point p in Neighbors(x, y))
             {
-                if (바둑판[p.X, p.Y] != opp)
+                if (Board[p.X, p.Y] != opp)
                     continue;
 
                 if (NoLiberty(p.X, p.Y))
@@ -233,7 +233,7 @@ this.panel1.Paint += panel1_Paint;
 
         private bool NoLiberty(int sx, int sy)
         {
-            STONE color = 바둑판[sx, sy];
+            STONE color = Board[sx, sy];
             bool[,] visited = new bool[19, 19];
 
             Queue<int> qx = new Queue<int>();
@@ -249,10 +249,10 @@ this.panel1.Paint += panel1_Paint;
 
                 foreach (Point p in Neighbors(cx, cy))
                 {
-                    if (바둑판[p.X, p.Y] == STONE.none)
+                    if (Board[p.X, p.Y] == STONE.none)
                         return false;
 
-                    if (바둑판[p.X, p.Y] == color && !visited[p.X, p.Y])
+                    if (Board[p.X, p.Y] == color && !visited[p.X, p.Y])
                     {
                         visited[p.X, p.Y] = true;
                         qx.Enqueue(p.X);
@@ -265,7 +265,7 @@ this.panel1.Paint += panel1_Paint;
 
         private void RemoveGroup(int sx, int sy)
         {
-            STONE color = 바둑판[sx, sy];
+            STONE color = Board[sx, sy];
             bool[,] visited = new bool[19, 19];
 
             Queue<int> qx = new Queue<int>();
@@ -279,12 +279,12 @@ this.panel1.Paint += panel1_Paint;
                 int cx = qx.Dequeue();
                 int cy = qy.Dequeue();
 
-                바둑판[cx, cy] = STONE.none;
+                Board[cx, cy] = STONE.none;
                 moveNumbers[cx, cy] = 0;
 
                 foreach (Point p in Neighbors(cx, cy))
                 {
-                    if (바둑판[p.X, p.Y] == color && !visited[p.X, p.Y])
+                    if (Board[p.X, p.Y] == color && !visited[p.X, p.Y])
                     {
                         visited[p.X, p.Y] = true;
                         qx.Enqueue(p.X);
@@ -357,7 +357,7 @@ for (int x = 3; x <= 15; x += 6)
             {
                 for (int y = 0; y < 19; y++)
                 {
-                    if (바둑판[x, y] == STONE.none)
+                    if (Board[x, y] == STONE.none)
                         continue;
 
                     Rectangle r = new Rectangle(
@@ -367,14 +367,14 @@ for (int x = 3; x <= 15; x += 6)
 
                     if (!imageFlag)
                     {
-                        if (바둑판[x, y] == STONE.black)
+                        if (Board[x, y] == STONE.black)
                             g.FillEllipse(bBrush, r);
                         else
                             g.FillEllipse(wBrush, r);
                     }
                     else
                     {
-                        string imgPath = (바둑판[x, y] == STONE.black)
+                        string imgPath = (Board[x, y] == STONE.black)
                             ? "../../Images/Go_b_no_bg.png"
                             : "../../Images/Go_w_no_bg.png";
 
@@ -385,7 +385,7 @@ for (int x = 3; x <= 15; x += 6)
                         }
                         catch
                         {
-                            if (바둑판[x, y] == STONE.black)
+                            if (Board[x, y] == STONE.black)
                                 g.FillEllipse(bBrush, r);
                             else
                                 g.FillEllipse(wBrush, r);
@@ -396,7 +396,7 @@ for (int x = 3; x <= 15; x += 6)
                     if (showMoveNumbers && moveNumbers[x, y] > 0)
                     {
                         string num = moveNumbers[x, y].ToString();
-                        Brush numBrush = (바둑판[x, y] == STONE.black) ? wBrush : bBrush;
+                        Brush numBrush = (Board[x, y] == STONE.black) ? wBrush : bBrush;
                         using (Font numFont = new Font("굴림", 10f, FontStyle.Bold))
                         {
                             SizeF sz = g.MeasureString(num, numFont);

@@ -29,7 +29,7 @@ else if (e.KeyCode == Keys.C && e.Control)
                 for (int i = 0; i < 19; i++)
                     for (int j = 0; j < 19; j++)
                     {
-                        바둑판[i, j] = STONE.none;
+                        Board[i, j] = STONE.none;
                         moveNumbers[i, j] = 0;
                     }
                 moveCount = 0;
@@ -56,12 +56,12 @@ private void DeleteLastMove()
             for (int i = moveHistory.Count - 1; i >= 0; i--)
             {
                 Point p = moveHistory[i];
-                if (바둑판[p.X, p.Y] == STONE.none)
+                if (Board[p.X, p.Y] == STONE.none)
                     continue;
 
                 moveNumbers[p.X, p.Y] = 0;
                 moveHistory.RemoveAt(i);
-                바둑판[p.X, p.Y] = STONE.none;
+                Board[p.X, p.Y] = STONE.none;
                 flag = !flag;
                 SetLastStoneToLastMove();
                 panel1.Invalidate();
