@@ -18,6 +18,12 @@ if (e.KeyCode == Keys.D)
                 ShowStatus(isMuted ? "소리 없음" : "소리 켜짐");
                 panel1.Invalidate();
             }
+            else if (e.KeyCode == Keys.P)
+            {
+                gridPointerEnabled = !gridPointerEnabled;
+                ShowStatus(gridPointerEnabled ? "그리드 포인터 사용" : "그리드 포인터 숨김");
+                panel1.Invalidate();
+            }
 else if (e.KeyCode == Keys.C && e.Control)
             {
                 for (int i = 0; i < 19; i++)

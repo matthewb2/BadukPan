@@ -72,7 +72,7 @@
             this.label2.Size = new System.Drawing.Size(216, 156);
             this.label2.TabIndex = 3;
             this.label2.Text = "수순에 따라 흑·백으로 기보를 기록하는\r\n바둑판 프로그램입니다.\r\n\r\n-- 사용방법 --\r\nD - 마지막 돌을 지움\r\nM - 소리 없음\r\nS - " +
-    "순번을 표시\r\nC - 순번 초기화\r\n숫자키 - 배경화면 변경\r\nCtrl + C - 화면 초기화\r\n\r\nCopyright © 2026 엠케이솔루" +
+    "순번을 표시\r\nC - 순번 초기화\r\n숫자키 - 배경화면 변경\r\nP - 그리드 포인터 사용\r\nCtrl + C - 화면 초기화\r\n\r\nCopyright © 2026 엠케이솔루" +
     "션 제공";
             // 
             // About

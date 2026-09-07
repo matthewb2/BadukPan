@@ -22,10 +22,12 @@ namespace BadukPan
         int moveCount = 0;
 bool showMoveNumbers = false;
         bool isMuted = false;
+        bool gridPointerEnabled = false;
         bool flag = false;
         bool imageFlag = true;
 
 int mouseX = 0, mouseY = 0;
+        int hoverX = -1, hoverY = -1;
         int lastStoneX = -1, lastStoneY = -1;
         List<Point> moveHistory = new List<Point>();
 
@@ -40,8 +42,10 @@ int mouseX = 0, mouseY = 0;
             // --- ✅ [1] 더블 버퍼링 설정 ---
             this.panel1.DoubleBuffered(true);
 
-            this.panel1.Paint += panel1_Paint;
+this.panel1.Paint += panel1_Paint;
             this.panel1.MouseDown += panel1_MouseDown;
+            this.panel1.MouseMove += panel1_MouseMove;
+            this.panel1.MouseLeave += panel1_MouseLeave;
             this.KeyDown += Form1_KeyDown;
             this.KeyPreview = true;
 
@@ -92,6 +96,28 @@ int mouseX = 0, mouseY = 0;
         {
             statusTimer.Stop();
             statusLabel.Visible = false;
+        }
+
+        private void panel1_MouseMove(object sender, MouseEventArgs e)
+        {
+            int x = (e.X - margin + GridSize / 2) / GridSize;
+            int y = (e.Y - margin + GridSize / 2) / GridSize;
+
+            if (x != hoverX || y != hoverY)
+            {
+                hoverX = (x >= 0 && x <= 18 && y >= 0 && y <= 18) ? x : -1;
+                hoverY = (x >= 0 && x <= 18 && y >= 0 && y <= 18) ? y : -1;
+                panel1.Invalidate();
+            }
+        }
+
+        private void panel1_MouseLeave(object sender, EventArgs e)
+        {
+            if (hoverX != -1 || hoverY != -1)
+            {
+                hoverX = hoverY = -1;
+                panel1.Invalidate();
+            }
         }
 
         private void 정보ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -296,7 +322,7 @@ int mouseX = 0, mouseY = 0;
                                  margin + 18 * GridSize, margin + i * GridSize);
             }
 
-            for (int x = 3; x <= 15; x += 6)
+for (int x = 3; x <= 15; x += 6)
             {
                 for (int y = 3; y <= 15; y += 6)
                 {
@@ -305,6 +331,23 @@ int mouseX = 0, mouseY = 0;
                         margin + GridSize * y - FeatureSize / 2,
                         FeatureSize, FeatureSize);
                 }
+            }
+
+            // 마우스가 가리키는 그리드에 차례 색 사각형 표시
+            if (gridPointerEnabled && hoverX >= 0 && hoverY >= 0)
+            {
+                int sq = 12;
+                Brush fill = flag ? wBrush : bBrush;
+                g.FillRectangle(fill,
+                    margin + GridSize * hoverX - sq / 2,
+                    margin + GridSize * hoverY - sq / 2,
+                    sq, sq);
+                /*
+                g.DrawRectangle(pen,
+                    margin + GridSize * hoverX - sq / 2,
+                    margin + GridSize * hoverY - sq / 2,
+                    sq, sq);
+                */
             }
         }
 
